@@ -3,7 +3,7 @@ import useAuth from '../hooks/useAuth';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 import axios from '../api/axios';
-const LOGIN_URL = '/auth';
+const LOGIN_URL = '/users/singIn';
 
 const Login = () => {
     const { setAuth } = useAuth();
@@ -15,8 +15,8 @@ const Login = () => {
     const userRef = useRef();
     const errRef = useRef();
 
-    const [user, setUser] = useState('');
-    const [pwd, setPwd] = useState('');
+    const [username, setUser] = useState('');
+    const [password, setPwd] = useState('');
     const [errMsg, setErrMsg] = useState('');
 
     useEffect(() => {
@@ -25,24 +25,31 @@ const Login = () => {
 
     useEffect(() => {
         setErrMsg('');
-    }, [user, pwd])
+    }, [username, password])
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+        console.log(username,password)
         try {
+            let data = JSON.stringify({
+                username: username,
+                password: password
+            })
             const response = await axios.post(LOGIN_URL,
-                JSON.stringify({ user, pwd }),
+    data,{ mode: 'cors' },
                 {
                     headers: { 'Content-Type': 'application/json' },
                     withCredentials: true
+                    
                 }
+                .then((response) => { console.log(response) })
             );
+            
             console.log(JSON.stringify(response?.data));
-            //console.log(JSON.stringify(response));
+            console.log(JSON.stringify(response));
             const accessToken = response?.data?.accessToken;
             const roles = response?.data?.roles;
-            setAuth({ user, pwd, roles, accessToken });
+            setAuth({  username,  password, roles, accessToken });
             setUser('');
             setPwd('');
             navigate(from, { replace: true });
@@ -73,7 +80,7 @@ const Login = () => {
                     ref={userRef}
                     autoComplete="off"
                     onChange={(e) => setUser(e.target.value)}
-                    value={user}
+                    value={username}
                     required
                 />
 
@@ -82,7 +89,7 @@ const Login = () => {
                     type="password"
                     id="password"
                     onChange={(e) => setPwd(e.target.value)}
-                    value={pwd}
+                    value={password}
                     required
                 />
                 <button>Sign In</button>
